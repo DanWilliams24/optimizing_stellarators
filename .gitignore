@@ -162,3 +162,8 @@ cython_debug/
 env
 env/
 *.vts
+
+
+
+DESC/
+simsopt/
