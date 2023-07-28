@@ -66,6 +66,15 @@ This specifically sets the variable in the case we are on the STELLAR cluster, a
 So the chain is:
 QSC -> DESC -> BNORM -> REGCOIL -> EVAL
 
+# How to run
+
+srun -N 1 -n 1 -c 8 --mem 8G -t XX:XX:XX python main.py
+
+If you require a GPU then:
+
+srun -N 1 -n 1 -c 8 -t 00:05:00 --gres=gpu:1 python main.py 
+
+
 
 
 # Checklist
