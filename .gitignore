@@ -171,3 +171,6 @@ qsc
 regcoil
 
 *.h5
+
+# Do not push NETCDF files to Repo, input files are fine though
+qsc_out.*
