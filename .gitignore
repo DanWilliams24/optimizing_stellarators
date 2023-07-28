@@ -163,7 +163,11 @@ env
 env/
 *.vts
 
+#OMMIT Supporting Libraries
 
+DESC
+simsopt
+qsc
+regcoil
 
-DESC/
-simsopt/
+*.h5
