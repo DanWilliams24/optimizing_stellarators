@@ -56,8 +56,8 @@ class QSConfig:
                     #print(param_parts)
                     #convert parameter value to the correct type of object
                     value = param_parts[1].strip()
-                    print(parameter)
-                    print(value)
+                    #print(parameter)
+                    #print(value)
                     
                     if  value.isnumeric():
                         #dealing with int type
@@ -73,14 +73,17 @@ class QSConfig:
                         # decimal
                         value = float(value)
                     else:
-                        #for now lets asssume this case means a string
-                        value = value.replace('"', "").replace("'", "").rstrip()
-                        if value == "true":
-                            value = True
-                        elif value == "false":
-                            value = False
+                        try:
+                            value = float(value)
+                        except:  
+                            #for now lets asssume this case means a string
+                            value = value.replace('"', "").replace("'", "").rstrip()
+                            if value == "true":
+                                value = True
+                            elif value == "false":
+                                value = False
                         
-                    print(type(value))
+                    #print(type(value))
                     #set the parameter either top level or in the sub level
                     if(not current_dir):
                        configuration[parameter] = value
@@ -88,19 +91,24 @@ class QSConfig:
                         configuration[current_dir][parameter] = value
                 #print(configuration)
         self.configuration = configuration
-        print(configuration)
+        #print(configuration)
 
-    def write_input_file(self,output_filename):
+    def write_input_file(self,output_filename, tabbed=False):
+        indentation = ""
+        if tabbed:
+            indentation = "\t"
+
         with open(output_filename, "w") as writer:
-            writer.write("# This is a auto-generated QSC input file from NEARSURVEY. Any errors here most likely indicate a problem with the QSC_Config Class\n")
+            writer.write("# This is a auto-generated input file from NEARSURVEY. Any errors here most likely indicate a problem with the QSC_Config Class\n")
 
-            # we use a stack here to store keys we need to traverse
+            # we traverse through all the keys writing out the subdirectories if needed
             for key in self.configuration.keys():
 
                 if type(self.configuration[key]) != dict:
                     # there does not exists a subdirectory, toplevel variable
                     if type(self.configuration[key]) == str:
-                        writer.write(f'\n{key} = "{self.configuration[key]}"\n')
+                        #top level variables do not need indentation
+                        writer.write(f"\n{key} = '{self.configuration[key]}'\n")
                     elif type(self.configuration[key]) == bool:
                             if self.configuration[key]:
                                 writer.write(f'{key} = true\n')
@@ -109,24 +117,32 @@ class QSConfig:
                     else:
                         writer.write(f"\n{key} = {self.configuration[key]}\n")
                 else:
+                    
                     # put heading and then two newlines (this seems standard across qsc inputs)
                     writer.write(f"\n{key}\n\n")
                     current_dir = key
                     for sub_key in self.configuration[key]:
-                        if type(self.configuration[key][sub_key]) == str:
-                            writer.write(f'{sub_key} = "{self.configuration[key][sub_key]}"\n')
+                        #sub level variables need indentation
+                        # in regcoil files there is the option 'load_bnorm' which must be outputted as .t. without quotes
+                        if type(self.configuration[key][sub_key]) == str and self.configuration[key][sub_key][0] != ".":
+
+                            writer.write(f"{indentation}{sub_key} = '{self.configuration[key][sub_key]}'\n")
                         elif type(self.configuration[key][sub_key]) == bool:
                             if self.configuration[key][sub_key]:
-                                writer.write(f'{sub_key} = true\n')
+                                writer.write(f'{indentation}{sub_key} = true\n')
                             else:
-                                 writer.write(f'{sub_key} = false\n')
+                                 writer.write(f'{indentation}{sub_key} = false\n')
                         else:
-                            writer.write(f"{sub_key} = {self.configuration[key][sub_key]}\n")
+                            writer.write(f"{indentation}{sub_key} = {self.configuration[key][sub_key]}\n")
                         
                 
 
 
 if __name__ == "__main__":
-    config = QSConfig("qsc_in.random_scan_small")
-    config['general_option'] = "multiopt"
-    config.write_input_file("qsc_in.multiopt_small_test")
+    config = QSConfig("regcoil_in.TEST")
+    print(config.configuration)
+    config['bnorm_filename'] = 'testfile_bnorm'
+    config['nescin_filename'] = 'testfile_nescin'
+    config['wout_filename'] = 'testfile_wout'
+    #config['general_option'] = "multiopt"
+    config.write_input_file("regcoil_in_EXPERIMENT.TEST", tabbed=True)
