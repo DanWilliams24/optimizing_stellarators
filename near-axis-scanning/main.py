@@ -37,8 +37,10 @@ def do_scan(config):
     config.write_input_file(f"{FILENAME}_new")
     test = subprocess.run(["xqsc", f"{FILENAME}_new"])
     print("Scan Completed. The exit code was: %d" % test.returncode)
-#takes 2.02 min on CPU to optimize 1 eq (two slow)
-#takes 53 sec on a GPU to optimize 1 eq (better but still too slow)
+
+    
+#takes 2.02 min on DESC CPU to optimize 1 eq (two slow)
+#takes 53 sec on a DESC GPU to optimize 1 eq (better but still too slow)
 
 
 def main():
@@ -70,24 +72,11 @@ def main():
         N=8,  # DESC toroidal resolution
         ntheta=ntheta,
     )
-    eq_fit = desc_eq.copy()  # copy so we can see the original Qsc surfaces later
 
-    # get the fixed-boundary constraints, which include also fixing the pressure and fixing the current profile (iota=False flag means fix current)
-    constraints = get_fixed_boundary_constraints(iota=False)
-    print(constraints)
 
-    # solve the equilibrium
-    desc_eq.solve(
-        verbose=3,
-        ftol=1e-2,
-        objective="force",
-        maxiter=100,
-        xtol=1e-6,
-        constraints=constraints,
-    )
+    # Save equilibrium as netcdf file
+    VMECIO.save(desc_eq, "./SOLOVEV_output.nc")
 
-    # Save equilibrium as .h5 file
-    VMECIO.save(eq, "./SOLOVEV_output.nc")
     
 
     '''
