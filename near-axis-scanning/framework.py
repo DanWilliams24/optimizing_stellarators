@@ -1,5 +1,6 @@
 import subprocess
 import desc
+import json
 import time
 from qsc_config import QSConfig
 from datetime import datetime
@@ -32,8 +33,7 @@ Given a NEAR AXIS Expansion QSC input file, this program will run xqsc, convert 
  This experiment will test
   - Whether QSC -> REGCOIL process can be done autonomously
   - How quickly such a framework computes for 1 configuration
-  - Whether this approach is scalable enough for direct application to an Optomitrist Algorithm vs a scan
-
+  - Whether this approach is scalable enough for direct application to an Optomitrist Algorithm vs a scan parameters methodology
 
 
   Methodology. One can treat this program as a abstract state machine where states are:
@@ -41,23 +41,37 @@ Given a NEAR AXIS Expansion QSC input file, this program will run xqsc, convert 
 
 '''
 
-
-
 def get_timestamp():
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %I:%M:%S")
     timestamp = dt_string.replace("/", "_").replace(" ", "_").replace(":", "_")
     return timestamp
 
+#TEMP
+def write_env_json_to_file(env_dict, name):
+    with open(f"private_{name}.json", "w") as f:
+        f.write(json.dumps(env_dict))
+
+
+#reads local env variable from file. 
+def get_env_from_file(filename):
+    with open(f"private_.{filename}.json", "r") as f:
+        return json.load(f)
+
+
+
+QSC_ENV = get_env_from_file("qsc_env")
+STELLOPT_ENV = get_env_from_file("stellopt_env")
+
 
 # Given a QSC input file, run the QSC executable and return the name of the output file
 def near_axis_solve(qsc_input_file):
     
-    test = subprocess.run(["xqsc", f"{qsc_input_file}"])
+    test = subprocess.run(["xqsc", f"{qsc_input_file}"], env= QSC_ENV)
     print("Scan Completed. The exit code was: %d" % test.returncode)
     
     return f"qsc_out.{qsc_input_file.replace('qsc_in.', '')}.nc"
-
+#expanding the near axis expansion to lower aspect ratio with DESC
 
 # Given a QSC output file, use PyQSC to convert to DESC equillibrium, solve that equilibrium from the magnetic axis, 
 # then output the solved Equillbrium
@@ -79,6 +93,7 @@ def convert_to_desc_eq(qsc_output_file):
     #===============================================================================#
     # get the fixed-boundary constraints, which include also fixing the pressure and 
     # fixing the current profile (iota=False flag means fix current)
+    '''
     constraints = get_fixed_boundary_constraints(iota=False)
     print(constraints)
 
@@ -90,7 +105,7 @@ def convert_to_desc_eq(qsc_output_file):
         maxiter=100,
         xtol=1e-6,
         constraints=constraints,
-    )
+    )'''
     #===============================================================================#
     return desc_eq
 
@@ -105,15 +120,19 @@ def convert_to_vmec(desc_eq):
 
 # Given a output VMEC file, get the Normal B field distribution
 def calculate_bnorm(bnorm_input):
-    new_bnorm_input = f"wout.{bnorm_input}"
-    test = subprocess.run(["mv", f"{bnorm_input}", new_bnorm_input])
-    test = subprocess.run(["bash", "-c","source ~/scripts/load_stellopt.sh"])
-    test = subprocess.run(["xbnorm", new_bnorm_input])
 
-    test = subprocess.run(["bash", "-c", "source ~/scripts/load_desc.sh"])
-    test = subprocess.run(["bash", "-c","source ~/scripts/load_qsc.sh"])
-    test = subprocess.run(["bash", "-c", "source ~/scripts/load_regcoil.sh"])
+    new_bnorm_input = f"wout.{bnorm_input}"
+    # cant modify modules from the 
+    test = subprocess.run(["mv", f"{bnorm_input}", new_bnorm_input])
+    
+    #test = subprocess.run(["bash", "-c","source ~/scripts/load_stellopt.sh"])
+    test = subprocess.run(["xbnorm", new_bnorm_input, "0.35"], env=STELLOPT_ENV)
+
+    #test = subprocess.run(["bash", "-c", "source ~/scripts/load_desc.sh"])
+    #test = subprocess.run(["bash", "-c","source ~/scripts/load_qsc.sh"])
+    #test = subprocess.run(["bash", "-c", "source ~/scripts/load_regcoil.sh"])
     return new_bnorm_input
+
 
 def generate_regcoil_input_file(wout, bnorm, nescin, out):
     regcoil_config = QSConfig("regcoil_in.template")
@@ -128,7 +147,6 @@ def generate_regcoil_input_file(wout, bnorm, nescin, out):
 def compute_regcoil(inputfile):
     test = subprocess.run(["regcoil", f"{inputfile}"])
 
-
     #all we need is the regcoil output format
     return ""
 
@@ -138,7 +156,6 @@ def main():
     qsc_output = near_axis_solve("qsc_in.random_scan_small")
     end_time = time.time()
     count_positive_time = end_time - start_time
-
     
     print("State: Converting to DESC")
     desc_eq = convert_to_desc_eq(qsc_output)
@@ -196,3 +213,4 @@ def mainv2():
 
 if __name__ == "__main__":
     mainv2()
+
