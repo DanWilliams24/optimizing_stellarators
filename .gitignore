@@ -172,7 +172,10 @@ regcoil
 
 *.h5
 
-# Do not push NETCDF files to Repo, input files are fine though
+# Do not push NETCDF, WOUT files to Repo, input files are fine though
 qsc_out.*
+wout.*
+bnorm.*
+nescin.*
 # do not push my private env variables
 private_.*
