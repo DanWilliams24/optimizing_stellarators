@@ -126,7 +126,7 @@ def calculate_bnorm(bnorm_input):
     test = subprocess.run(["mv", f"{bnorm_input}", new_bnorm_input])
     
     #test = subprocess.run(["bash", "-c","source ~/scripts/load_stellopt.sh"])
-    test = subprocess.run(["xbnorm", new_bnorm_input, "0.35"], env=STELLOPT_ENV)
+    #test = subprocess.run(["xbnorm", new_bnorm_input, "0.35"], env=STELLOPT_ENV)
 
     #test = subprocess.run(["bash", "-c", "source ~/scripts/load_desc.sh"])
     #test = subprocess.run(["bash", "-c","source ~/scripts/load_qsc.sh"])
@@ -137,10 +137,10 @@ def calculate_bnorm(bnorm_input):
 def generate_regcoil_input_file(wout, bnorm, nescin, out):
     regcoil_config = QSConfig("regcoil_in.template")
     regcoil_config['wout_filename'] = wout
-    regcoil_config['bnorm_filename'] = bnorm
-    regcoil_config['nescin_filename'] = nescin
+    #regcoil_config['bnorm_filename'] = bnorm
+    #regcoil_config['nescin_filename'] = nescin
     input_filename = f"regcoil_in.{out}"
-    regcoil_config.write_input_file(input_filename)
+    regcoil_config.write_input_file(input_filename, regcoil_opt=True)
     #set any other relevant params
     return input_filename
 
