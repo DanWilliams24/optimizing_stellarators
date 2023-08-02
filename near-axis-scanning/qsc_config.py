@@ -135,7 +135,7 @@ class QSConfig:
                         else:
                             writer.write(f"{indentation}{sub_key} = {self.configuration[key][sub_key]}\n")
                         
-                
+        print(f"Wrote to output file: {output_filename}")
 
 
 if __name__ == "__main__":
