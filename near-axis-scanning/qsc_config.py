@@ -93,9 +93,9 @@ class QSConfig:
         self.configuration = configuration
         #print(configuration)
 
-    def write_input_file(self,output_filename, tabbed=False):
+    def write_input_file(self,output_filename, regcoil_opt=False):
         indentation = ""
-        if tabbed:
+        if regcoil_opt:
             indentation = "\t"
 
         with open(output_filename, "w") as writer:
@@ -145,4 +145,4 @@ if __name__ == "__main__":
     config['nescin_filename'] = 'testfile_nescin'
     config['wout_filename'] = 'testfile_wout'
     #config['general_option'] = "multiopt"
-    config.write_input_file("regcoil_in_EXPERIMENT.TEST", tabbed=True)
+    config.write_input_file("regcoil_in_EXPERIMENT.TEST", regcoil_opt=True)
