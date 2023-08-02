@@ -174,3 +174,5 @@ regcoil
 
 # Do not push NETCDF files to Repo, input files are fine though
 qsc_out.*
+# do not push my private env variables
+private_.*
