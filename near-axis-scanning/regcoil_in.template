@@ -10,7 +10,7 @@
   mpol_potential = 8
   ntor_potential = 8
 
-  geometry_option_plasma = 2
+  geometry_option_plasma = 1
   wout_filename = 'wout_SOLOVEV_output.nc'
 
   geometry_option_coil=2
