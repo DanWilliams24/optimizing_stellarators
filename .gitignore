@@ -161,4 +161,10 @@ cython_debug/
 .ipynb_checkpoints
 env
 env/
+
+
+
+
+#output files from stellarator optimization runs. Do not push them to the repository. Move them via SFTP or some other file sharing utility
 *.vts
+paraview_outputs/
