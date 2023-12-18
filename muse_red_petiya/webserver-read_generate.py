@@ -1,0 +1,85 @@
+import dash
+from dash import dcc, html
+from dash.dependencies import Output, Input
+import plotly.graph_objs as go
+import redpitaya_scpi as scpi
+import time
+import os
+
+# Initialize Red Pitaya connection
+IP = 'rp-F0956B.local'
+rp_s = scpi.scpi(IP)
+rp_s.tx_txt('ACQ:RST')
+dec = 4
+rp_s.acq_set(dec)
+
+# Initialize Dash app
+app = dash.Dash(__name__)
+app.layout = html.Div([
+    dcc.Graph(id='live-graph', animate=True),
+    dcc.Interval(
+        id='graph-update',
+        interval=1000, # in milliseconds
+        n_intervals=0
+    ),
+])
+
+@app.callback(
+    Output('live-graph', 'figure'),
+    [Input('graph-update', 'n_intervals')]
+)
+def update_graph(n):
+    rp_s.tx_txt('ACQ:START')
+    rp_s.tx_txt('ACQ:TRIG NOW')
+
+    while True:
+        rp_s.tx_txt('ACQ:TRIG:STAT?')
+        if rp_s.rx_txt() == 'TD':
+            break
+
+    buff = rp_s.acq_data(1, convert=True)
+    #print(buff)
+    data = go.Scatter(
+        y=buff,
+        mode='lines',
+        name='Voltage'
+    )
+    # auto-scaling based on the current buffer data
+    y_range = [min(buff), max(buff)] if buff else [0, 1]  # Default range if buff is empty
+    x_range = [0, len(buff)] if buff else [0, 1]  # Default range if buff is empty
+
+    return {'data': [data], 
+            'layout': go.Layout(xaxis=dict(range=x_range), 
+                                yaxis=dict(range=y_range),
+                                title='Real-time Voltage Plot')}
+    #return {'data': [data], 'layout': go.Layout(xaxis=dict(range=[min(buff), max(buff)]), yaxis=dict(range=[min(buff), max(buff)]))}
+
+
+def generate_signal():
+
+    #generate sine wave
+    wave_form = 'sine'
+    freq = 10000
+    ampl = 1
+    #print("Generate waveform")
+    rp_s.tx_txt('GEN:RST')
+
+    # Function for configuring a Source
+    rp_s.sour_set(1, wave_form, ampl, freq, burst=True, nor=10000, ncyc=2, period=5000)
+    # nor=65536 for INF pulses
+
+    rp_s.tx_txt('OUTPUT1:STATE ON')
+    rp_s.tx_txt('SOUR1:TRIG:INT')
+
+    rp_s.close()
+
+if __name__ == '__main__':
+    pid = os.fork()
+    if pid > 0:
+        print("lets read waveform")
+        app.run_server(debug=True)
+    else:
+        print("lets generate waveform")
+        generate_signal()
+
+
