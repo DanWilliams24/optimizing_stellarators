@@ -1,0 +1,27 @@
+# This is a auto-generated input file from NEARSURVEY. Any errors here most likely indicate a problem with the QSC_Config Class
+
+&regcoil_nml
+
+	nlambda = 1
+	lambda_min = 1e-15
+	lambda_max = 1e-14
+	ntheta_plasma = 128
+	ntheta_coil = 128
+	nzeta_plasma = 128
+	nzeta_coil = 128
+	mpol_potential = 8
+	ntor_potential = 8
+	geometry_option_plasma = 2
+	wout_filename = 'testfile_wout'
+	geometry_option_coil = 2
+	nescin_filename = 'testfile_nescin'
+	separation = 0.5
+	load_bnorm = .t.
+	bnorm_filename = 'testfile_bnorm'
+	net_poloidal_current_Amperes = 0.0
+	net_toroidal_current_Amperes = 0.0
+	symmetry_option = 1
+	save_level = 1
+
+/
+

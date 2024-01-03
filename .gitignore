@@ -168,3 +168,20 @@ env/
 #output files from stellarator optimization runs. Do not push them to the repository. Move them via SFTP or some other file sharing utility
 *.vts
 paraview_outputs/
+
+#OMMIT Supporting Libraries
+
+DESC
+simsopt
+qsc
+regcoil
+
+*.h5
+
+# Do not push NETCDF, WOUT files to Repo, input files are fine though
+qsc_out.*
+wout.*
+bnorm.*
+nescin.*
+# do not push my private env variables
+private_.*
